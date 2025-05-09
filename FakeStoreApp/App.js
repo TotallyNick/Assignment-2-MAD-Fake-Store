@@ -1,21 +1,21 @@
+// App.js
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import cartReducer from './src/components/cartSlice';
 
-import CategoryScreen from './src/screens/CategoryScreen';
-import ProductListScreen from './src/screens/ProductListScreen';
-import ProductDetailScreen from './src/screens/ProductDetailsScreen';
+import AppNavigator from './src/components/AppNavigator'; 
 
-const Stack = createNativeStackNavigator();
+const store = configureStore({
+  reducer: {
+    cart: cartReducer,
+  },
+});
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Category">
-        <Stack.Screen name="Category" component={CategoryScreen} />
-        <Stack.Screen name="ProductList" component={ProductListScreen} />
-        <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <AppNavigator />
+    </Provider>
   );
 }
