@@ -1,35 +1,72 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const initialState = {
+  items: [],
+  orders: [],
+};
+
 const cartSlice = createSlice({
   name: 'cart',
-  initialState: [],
+  initialState,
   reducers: {
-    addToCart: (state, action) => {
-      const product = action.payload;
-      const existing = state.find(item => item.id === product.id);
-
+    addToCart(state, action) {
+      const existing = state.items.find(item => item.id === action.payload.id);
       if (existing) {
         existing.quantity += 1;
       } else {
-        state.push({ ...product, quantity: 1 });
+        state.items.push({ ...action.payload, quantity: 1 });
       }
     },
-    increaseQuantity: (state, action) => {
-      const item = state.find(i => i.id === action.payload);
+    removeFromCart(state, action) {
+      state.items = state.items.filter(item => item.id !== action.payload);
+    },
+    increaseQuantity(state, action) {
+      const item = state.items.find(item => item.id === action.payload);
       if (item) item.quantity += 1;
     },
-    decreaseQuantity: (state, action) => {
-      const index = state.findIndex(i => i.id === action.payload);
-      if (index !== -1) {
-        if (state[index].quantity > 1) {
-          state[index].quantity -= 1;
-        } else {
-          state.splice(index, 1);
-        }
+    decreaseQuantity(state, action) {
+      const item = state.items.find(item => item.id === action.payload);
+      if (item && item.quantity > 1) item.quantity -= 1;
+      else state.items = state.items.filter(i => i.id !== action.payload);
+    },
+    clearCart(state) {
+      state.items = [];
+    },
+    checkoutCart(state, action) {
+      const userEmail = action.payload;
+      if (state.items.length > 0 && userEmail) {
+        const total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const newOrder = {
+          id: Date.now(),
+          status: 'new',
+          items: [...state.items],
+          total,
+          userEmail,
+        };
+        state.orders.push(newOrder);
+        state.items = [];
       }
+    },
+    updateOrderStatus(state, action) {
+      const { id, status } = action.payload;
+      const order = state.orders.find(o => o.id === id);
+      if (order) order.status = status;
+    },
+    clearOrders(state) {
+      state.orders = [];
     },
   },
 });
 
-export const { addToCart, increaseQuantity, decreaseQuantity } = cartSlice.actions;
+export const {
+  addToCart,
+  removeFromCart,
+  increaseQuantity,
+  decreaseQuantity,
+  clearCart,
+  checkoutCart,
+  updateOrderStatus,
+  clearOrders,
+} = cartSlice.actions;
+
 export default cartSlice.reducer;

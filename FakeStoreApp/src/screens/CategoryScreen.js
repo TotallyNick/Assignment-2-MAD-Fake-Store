@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
 import { fetchCategories } from '../services/api';
-import CategoryItem from '../components/CategoryItem';
 
 export default function CategoryScreen({ navigation }) {
   const [categories, setCategories] = useState([]);
@@ -13,7 +12,7 @@ export default function CategoryScreen({ navigation }) {
         const data = await fetchCategories();
         setCategories(data);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Failed to fetch categories:', error);
       } finally {
         setLoading(false);
       }
@@ -30,22 +29,41 @@ export default function CategoryScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={categories}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <CategoryItem
-            category={item}
-            onPress={() => navigation.navigate('ProductList', { category: item })}
-          />
-        )}
-      />
-    </View>
+    <FlatList
+      data={categories}
+      keyExtractor={(item) => item}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() => navigation.navigate('ProductList', { category: item })}
+        >
+          <Text style={styles.text}>{item}</Text>
+        </TouchableOpacity>
+      )}
+      contentContainerStyle={styles.container}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  item: {
+    backgroundColor: '#f2f2f2',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });

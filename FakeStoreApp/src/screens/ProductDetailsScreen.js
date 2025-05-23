@@ -16,23 +16,21 @@ export default function ProductDetailScreen({ route, navigation }) {
         const data = await fetchProductDetail(id);
         setProduct(data);
       } catch (error) {
-        console.error('Error fetching product detail:', error);
+        console.error('Failed to fetch product detail:', error);
       } finally {
         setLoading(false);
       }
     }
-
     loadProduct();
   }, [id]);
 
   const handleAddToCart = () => {
     if (!product) return;
-
     dispatch(addToCart({
       id: product.id,
       title: product.title,
       price: product.price,
-      image: product.image, 
+      image: product.image,
     }));
   };
 
@@ -47,7 +45,7 @@ export default function ProductDetailScreen({ route, navigation }) {
   if (!product) {
     return (
       <View style={styles.center}>
-        <Text>Product not found.</Text>
+        <Text>Product not found</Text>
       </View>
     );
   }
@@ -56,15 +54,13 @@ export default function ProductDetailScreen({ route, navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Image source={{ uri: product.image }} style={styles.image} />
       <Text style={styles.title}>{product.title}</Text>
-      <Text style={styles.price}>${product.price}</Text>
-      {product.rating && (
-        <Text style={styles.rating}>
-          Rating: {product.rating.rate} ⭐ ({product.rating.count} reviews)
-        </Text>
-      )}
+      <Text style={styles.price}>${product.price.toFixed(2)}</Text>
+      <Text style={styles.rating}>
+        Rating: {product.rating?.rate} ⭐ ({product.rating?.count} reviews)
+      </Text>
       <Text style={styles.description}>{product.description}</Text>
 
-      <Button title="Add to Shopping Cart" onPress={handleAddToCart} />
+      <Button title="Add to Cart" onPress={handleAddToCart} />
       <View style={{ marginTop: 10 }}>
         <Button title="Back" onPress={() => navigation.goBack()} />
       </View>

@@ -1,13 +1,35 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { useSelector } from 'react-redux';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
 import CartItem from '../components/CartItem';
+import { clearCart } from '../components/cartSlice';
+import { submitOrder } from '../services/api';
 
 export default function CartScreen() {
-  const cart = useSelector(state => state.cart);
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.items);
+  const user = useSelector((state) => state.auth.user);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalCost = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
+
+  const handleCheckout = async () => {
+    if (cart.length === 0) return;
+    if (!user?.token) {
+      Alert.alert('Error', 'Missing user token.');
+      console.log('USER OBJECT:', user);
+
+      return;
+    }
+
+    try {
+      await submitOrder(cart, user.token);
+      Alert.alert('Checkout Complete', 'Your order has been placed.');
+      dispatch(clearCart());
+    } catch (err) {
+      Alert.alert('Error', err.message);
+    }
+  };
 
   if (cart.length === 0) {
     return (
@@ -30,7 +52,7 @@ export default function CartScreen() {
         contentContainerStyle={styles.list}
       />
 
-      <TouchableOpacity style={styles.checkoutButton}>
+      <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
         <Text style={styles.checkoutText}>Checkout</Text>
       </TouchableOpacity>
     </View>
